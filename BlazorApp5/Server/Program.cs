@@ -11,6 +11,10 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddDbContext<PersonaContexto>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddMvc().AddNewtonsoftJson(options =>
+options.SerializerSettings.ReferenceLoopHandling =
+Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
