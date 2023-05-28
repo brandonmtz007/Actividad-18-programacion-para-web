@@ -100,6 +100,7 @@ namespace BlazorApp5.Server.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePersona(int id)
         {
+            Console.WriteLine($"DeletePersona method called for ID: {id}");
             if (_context.Personas == null)
             {
                 return NotFound();

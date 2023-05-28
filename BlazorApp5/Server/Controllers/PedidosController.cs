@@ -25,12 +25,14 @@ namespace BlazorApp5.Server.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Pedido>>> GetPedidos()
         {
-          if (_context.Pedidos == null)
-          {
-              return NotFound();
-          }
-            return await _context.Pedidos.ToListAsync();
+            if (_context.Pedidos == null)
+            {
+                return NotFound();
+            }
+
+            return await _context.Pedidos.Include(p => p.Cliente).ToListAsync();
         }
+
 
         // GET: api/Pedidos/5
         [HttpGet("{id}")]
@@ -86,15 +88,17 @@ namespace BlazorApp5.Server.Controllers
         [HttpPost]
         public async Task<ActionResult<Pedido>> PostPedido(Pedido pedido)
         {
-          if (_context.Pedidos == null)
-          {
-              return Problem("Entity set 'PersonaContexto.Pedidos'  is null.");
-          }
+            if (_context.Pedidos == null)
+            {
+                return NotFound();
+            }
+
             _context.Pedidos.Add(pedido);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPedido", new { id = pedido.Id }, pedido);
+            return CreatedAtAction(nameof(GetPedido), new { id = pedido.Id }, pedido);
         }
+
 
         // DELETE: api/Pedidos/5
         [HttpDelete("{id}")]

@@ -1,0 +1,80 @@
+﻿@page "/pedido/nuevo"
+@page "/pedido/editar/{Id:int}"
+@inject HttpClient _http
+@inject NavigationManager _navigator
+@using BlazorApp5.Shared.Modelo
+
+<h3>Nuevo Pedido</h3>
+
+<EditForm Model="@pedido" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label for="txtNumeroPedido" class="form-label">Número de pedido</label>
+        <InputNumber id="txtNumeroPedido" class="form-control" @bind-Value="pedido.Numero_pedido" />
+        <ValidationMessage For="()=>pedido.Numero_pedido" />
+    </div>
+
+    <div class="mb-3">
+        <label for="txtFechaPedido" class="form-label">Fecha de pedido</label>
+        <InputDate id="txtFechaPedido" class="form-control" @bind-Value="pedido.Fecha_pedido" />
+        <ValidationMessage For="()=>pedido.Fecha_pedido" />
+    </div>
+
+    <div class="mb-3">
+        <label for="txtEstado" class="form-label">Estado</label>
+        <InputText id="txtEstado" class="form-control" @bind-Value="pedido.Estado" />
+        <ValidationMessage For="()=>pedido.Estado" />
+    </div>
+
+    <div class="mb-3">
+        <label for="txtFechaEstimada" class="form-label">Fecha estimada</label>
+        <InputDate id="txtFechaEstimada" class="form-control" @bind-Value="pedido.Fecha_estimada" />
+        <ValidationMessage For="()=>pedido.Fecha_estimada" />
+    </div>
+
+    <div class="mb-3">
+        <label for="txtClienteId" class="form-label">Cliente ID</label>
+        <InputNumber id="txtClienteId" class="form-control" @bind-Value="pedido.Cliente_id" />
+        <ValidationMessage For="()=>pedido.Cliente_id" />
+    </div>
+
+    <div>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button class="btn btn-danger" @onclick="Cancelar">Cancelar</button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Pedido pedido = new Pedido();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id > 0)
+        {
+            pedido = await _http.GetFromJsonAsync<Pedido>($"api/pedidos/{Id}");
+        }
+    }
+
+    private void Cancelar()
+    {
+        _navigator.NavigateTo("pedidos");
+    }
+
+    private async Task Guardar()
+    {
+        if (Id > 0)
+        {
+            await _http.PutAsJsonAsync($"api/pedidos/{Id}", pedido);
+        }
+        else
+        {
+            await _http.PostAsJsonAsync("api/pedidos", pedido);
+        }
+
+        Cancelar();
+    }
+}

@@ -1,0 +1,94 @@
+﻿@page "/producto/nuevo"
+@page "/producto/editar/{id:int}"
+@inject HttpClient _http
+@inject NavigationManager _navigator
+@using BlazorApp5.Shared.Modelo
+
+<h3>@(producto.Id == 0 ? "Nuevo" : "Editar") Producto</h3>
+
+<EditForm Model="@producto" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label for="txtNombre" class="form-label">Nombre</label>
+        <InputText id="txtNombre" class="form-control" @bind-Value="producto.Nombre" />
+        <ValidationMessage For="()=>producto.Nombre" />
+    </div>
+
+    <div class="mb-3">
+        <label for="txtDescripcion" class="form-label">Descripción</label>
+        <InputTextArea id="txtDescripcion" class="form-control" @bind-Value="producto.Descripcion" />
+        <ValidationMessage For="()=>producto.Descripcion" />
+    </div>
+
+    <div class="mb-3">
+        <label for="txtPrecio" class="form-label">Precio</label>
+        <InputNumber id="txtPrecio" class="form-control" step="0.01" @bind-Value="producto.Precio" />
+        <ValidationMessage For="()=>producto.Precio" />
+    </div>
+
+    <div class="mb-3">
+        <label for="txtCantidad" class="form-label">Cantidad</label>
+        <InputNumber id="txtCantidad" class="form-control" @bind-Value="producto.Cantidad" />
+        <ValidationMessage For="()=>producto.Cantidad" />
+    </div>
+
+    <div class="mb-3">
+        <label for="txtCategoria" class="form-label">Categoría</label>
+        <InputText id="txtCategoria" class="form-control" @bind-Value="producto.Categoria" />
+        <ValidationMessage For="()=>producto.Categoria" />
+    </div>
+
+    <div class="mb-3">
+        <label for="ddlPedido" class="form-label">Pedido</label>
+        <select id="ddlPedido" class="form-control" @bind="producto.PedidoId">
+            <option value="">Seleccione un pedido...</option>
+            @foreach (var pedido in pedidos)
+            {
+                <option value="@pedido.Id">@pedido.Numero_pedido</option>
+            }
+        </select>
+        <ValidationMessage For="()=>producto.PedidoId" />
+    </div>
+
+    <div>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button class="btn btn-danger" @onclick="Cancelar">Cancelar</button>
+    </div>
+</EditForm>
+
+@code {
+    private Producto producto = new Producto();
+    private List<Pedido> pedidos = new List<Pedido>();
+
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != 0)
+        {
+            producto = await _http.GetFromJsonAsync<Producto>($"api/productos/{Id}");
+        }
+
+        pedidos = await _http.GetFromJsonAsync<List<Pedido>>("api/pedidos");
+    }
+
+    private void Cancelar()
+    {
+        _navigator.NavigateTo("productos");
+    }
+
+    private async Task Guardar()
+    {
+        if (producto.Id == 0)
+        {
+            await _http.PostAsJsonAsync("api/productos", producto);
+        }
+        else
+        {
+            await _http.PutAsJsonAsync($"api/productos/{producto.Id}", producto);
+        }
+        Cancelar();
+    }
+}

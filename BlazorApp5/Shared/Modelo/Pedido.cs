@@ -22,7 +22,7 @@ namespace BlazorApp5.Shared.Modelo
 
         [Required(ErrorMessage = "El estado no puede estar vacío")]
         [MaxLength(50)]
-        public string Estado { get; set; }
+        public string? Estado { get; set; }
 
         [Required(ErrorMessage = "La fecha estimada no puede estar vacía")]
         public DateTime Fecha_estimada { get; set; }

@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlazorApp5.Shared.Modelo
 {
@@ -30,10 +27,7 @@ namespace BlazorApp5.Shared.Modelo
         [Required(ErrorMessage = "La categoría no puede estar vacía")]
         [MaxLength(50)]
         public string? Categoria { get; set; }
-
-        [Required(ErrorMessage = "La imagen no puede estar vacía")]
-        [MaxLength(255)]
-        public string? Imagen { get; set; }
-        public virtual ICollection<Pedido>? Pedido { get; set; }
+        public int PedidoId { get; set; }
+        public virtual Pedido? Pedido { get; set; }
     }
 }

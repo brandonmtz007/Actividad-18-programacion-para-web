@@ -1,0 +1,92 @@
+﻿@page "/personas"
+@inject HttpClient _http
+@inject NavigationManager _navigator
+@inject IJSRuntime JSRuntime
+@using BlazorApp5.Shared.Modelo
+
+<h3>Personas</h3>
+<button class="btn btn-primary mb-3" @onclick="Agregar">Agregar</button>
+
+@if (personas == null)
+{
+    <br />
+    <div class="spinner-grow" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Dirección</th>
+                <th>Correo</th>
+                <th>Teléfono</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var persona in personas)
+            {
+                <tr>
+                    <td>@persona.Nombre</td>
+                    <td>@persona.Direccion</td>
+                    <td>@persona.Correo</td>
+                    <td>@persona.Telefono</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="()=>Editar(persona.Id)"><span class="oi oi-pencil"></span></button>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="()=>ConfirmarBorrar(persona.Id)"><span class="oi oi-trash"></span></button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Persona> personas;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Cargar();
+    }
+
+    private async Task Cargar()
+    {
+        personas = await _http.GetFromJsonAsync<List<Persona>>("api/personas");
+    }
+
+    private void Agregar()
+    {
+        _navigator.NavigateTo("persona/nueva");
+    }
+
+    private async Task Editar(int id)
+    {
+        _navigator.NavigateTo($"persona/editar/{id}");
+    }
+
+    private async Task ConfirmarBorrar(int id)
+    {
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "¿Estás seguro de eliminar esta persona?");
+
+        if (confirmed)
+        {
+            await Borrar(id);
+        }
+    }
+
+    private async Task Borrar(int id)
+    {
+        try
+        {
+            await _http.DeleteAsync($"api/personas/{id}");
+            await Cargar();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting persona: {ex.Message}");
+        }
+    }
+}

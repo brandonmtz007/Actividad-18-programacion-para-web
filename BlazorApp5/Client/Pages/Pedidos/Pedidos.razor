@@ -1,0 +1,112 @@
+﻿@page "/pedidos"
+@inject HttpClient _http
+@inject NavigationManager _navigator
+@using BlazorApp5.Shared.Modelo
+
+<h3>Pedidos</h3>
+<button class="btn btn-primary mb-3" @onclick="Agregar">Agregar</button>
+
+@if (pedidos == null)
+{
+    <br />
+    <div class="spinner-grow" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Número de pedido</th>
+                <th>Fecha de pedido</th>
+                <th>Estado</th>
+                <th>Fecha estimada</th>
+                <th>Cliente</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Pedido pedido in pedidos)
+            {
+                <tr>
+                    <td>@pedido.Numero_pedido</td>
+                    <td>@pedido.Fecha_pedido.ToShortDateString()</td>
+                    <td>@pedido.Estado</td>
+                    <td>@pedido.Fecha_estimada.ToShortDateString()</td>
+                    <td>@(pedido.Cliente != null ? pedido.Cliente.Nombre : "N/A")</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="()=>Editar(pedido.Id)"><span class="oi oi-pencil"></span></button>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="()=>Borrar(pedido.Id)"><span class="oi oi-trash"></span></button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (borrarActivo)
+{
+    <div class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar eliminación</h5>
+                    <button type="button" class="btn-close" @onclick="CancelarBorrar"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de eliminar este pedido?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CancelarBorrar">Cancelar</button>
+                    <button type="button" class="btn btn-danger" @onclick="AceptarBorrar">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Pedido> pedidos;
+    private bool borrarActivo = false;
+    private int borrarId = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Cargar();
+    }
+
+    private async Task Cargar()
+    {
+        pedidos = await _http.GetFromJsonAsync<List<Pedido>>("api/pedidos");
+    }
+
+    private void Agregar()
+    {
+        _navigator.NavigateTo("pedido/nuevo");
+    }
+
+    private void Editar(int id)
+    {
+        _navigator.NavigateTo($"pedido/editar/{id}");
+    }
+
+    private void Borrar(int id)
+    {
+        borrarActivo = true;
+        borrarId = id;
+    }
+
+    private void CancelarBorrar()
+    {
+        borrarActivo = false;
+        borrarId = 0;
+    }
+
+    private async Task AceptarBorrar()
+    {
+        await _http.DeleteAsync($"api/pedidos/{borrarId}");
+        await Cargar();
+        CancelarBorrar();
+    }
+}

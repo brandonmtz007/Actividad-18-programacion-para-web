@@ -1,0 +1,74 @@
+﻿@page "/persona/nueva"
+@page "/persona/editar/{Id:int}"
+@inject HttpClient _http
+@inject NavigationManager _navigator
+@using BlazorApp5.Shared.Modelo
+
+<h3>Nueva persona</h3>
+
+<EditForm Model="@persona" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label for="txtNombre" class="form-label">Nombre</label>
+        <InputText class="form-control" id="txtNombre" @bind-Value="persona.Nombre" />
+        <ValidationMessage For="() => persona.Nombre" />
+    </div>
+
+    <div class="mb-3">
+        <label for="txtDireccion" class="form-label">Dirección</label>
+        <InputText class="form-control" id="txtDireccion" @bind-Value="persona.Direccion" />
+        <ValidationMessage For="() => persona.Direccion" />
+    </div>
+
+    <div class="mb-3">
+        <label for="txtCorreo" class="form-label">Correo</label>
+        <InputText class="form-control" id="txtCorreo" @bind-Value="persona.Correo" />
+        <ValidationMessage For="() => persona.Correo" />
+    </div>
+
+    <div class="mb-3">
+        <label for="txtTelefono" class="form-label">Teléfono</label>
+        <InputText class="form-control" id="txtTelefono" @bind-Value="persona.Telefono" />
+        <ValidationMessage For="() => persona.Telefono" />
+    </div>
+
+    <div>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button class="btn btn-danger" @onclick="Cancelar">Cancelar</button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Persona persona = new Persona();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id > 0)
+        {
+            persona = await _http.GetFromJsonAsync<Persona>($"api/personas/{Id}");
+        }
+    }
+
+    private void Cancelar()
+    {
+        _navigator.NavigateTo("personas");
+    }
+
+    private async Task Guardar()
+    {
+        if (Id > 0)
+        {
+            await _http.PutAsJsonAsync($"api/personas/{Id}", persona);
+        }
+        else
+        {
+            await _http.PostAsJsonAsync("api/personas", persona);
+        }
+
+        Cancelar();
+    }
+}

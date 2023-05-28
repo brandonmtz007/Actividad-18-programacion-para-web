@@ -4,6 +4,7 @@ using BlazorApp5.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlazorApp5.Server.Migrations
 {
     [DbContext(typeof(PersonaContexto))]
-    partial class PersonaContextoModelSnapshot : ModelSnapshot
+    [Migration("20230528002342_cambiodeproducto")]
+    partial class cambiodeproducto
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -111,17 +114,27 @@ namespace BlazorApp5.Server.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("PedidoId")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("Precio")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PedidoId");
-
                     b.ToTable("Productos");
+                });
+
+            modelBuilder.Entity("PedidoProducto", b =>
+                {
+                    b.Property<int>("PedidoId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductosId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PedidoId", "ProductosId");
+
+                    b.HasIndex("ProductosId");
+
+                    b.ToTable("PedidoProducto");
                 });
 
             modelBuilder.Entity("BlazorApp5.Shared.Modelo.Pedido", b =>
@@ -135,20 +148,19 @@ namespace BlazorApp5.Server.Migrations
                     b.Navigation("Cliente");
                 });
 
-            modelBuilder.Entity("BlazorApp5.Shared.Modelo.Producto", b =>
+            modelBuilder.Entity("PedidoProducto", b =>
                 {
-                    b.HasOne("BlazorApp5.Shared.Modelo.Pedido", "Pedido")
-                        .WithMany("Productos")
+                    b.HasOne("BlazorApp5.Shared.Modelo.Pedido", null)
+                        .WithMany()
                         .HasForeignKey("PedidoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Pedido");
-                });
-
-            modelBuilder.Entity("BlazorApp5.Shared.Modelo.Pedido", b =>
-                {
-                    b.Navigation("Productos");
+                    b.HasOne("BlazorApp5.Shared.Modelo.Producto", null)
+                        .WithMany()
+                        .HasForeignKey("ProductosId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("BlazorApp5.Shared.Modelo.Persona", b =>
